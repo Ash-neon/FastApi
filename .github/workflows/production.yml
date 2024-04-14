@@ -56,7 +56,7 @@ jobs:
           uses: docker/build-push-action@v5
           with:
             push: true
-            tags: user/devops:${{ github.sha }}
+            tags: ashneon/devops:${{ github.sha }}
             platforms: linux/amd64,linux/arm64
             cache-from: type=registry,ref=user/devops:cache
             cache-to: type=inline,mode=max
@@ -67,7 +67,7 @@ jobs:
         - name: Scan the Docker image with Trivy
           uses: aquasecurity/trivy-action@master
           with:
-            image-ref: 'user/devops:${{ github.sha }}'
+            image-ref: 'ashneon/devops:${{ github.sha }}'
             format: 'table'
             exit-code: '1'
             ignore-unfixed: true
