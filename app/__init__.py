@@ -1,2 +1,2 @@
 def start():
-    xzzze
+    return True
