@@ -39,9 +39,7 @@ jobs:
         run: pytest
 
   build-and-push-docker:
-      needs: test
       runs-on: ubuntu-latest
-      environment: production # Specifies the environment to use
       steps:
         - uses: actions/checkout@v4
             
@@ -52,19 +50,25 @@ jobs:
           uses: docker/login-action@v3
           with:
             username: ${{ secrets.DOCKER_USERNAME }}
-            password: ${{ secrets.DOCKER_PASSWORD}}
-                
+            password: ${{ secrets.DOCKER_PASSWORD }}
+            
         - name: Build and push Docker image
           uses: docker/build-push-action@v5
           with:
             push: true
-            tags: ashneon/devops:latest            
-          
-        - name: Scan the Docker image
+            tags: user/devops:${{ github.sha }}
+            platforms: linux/amd64,linux/arm64
+            cache-from: type=registry,ref=user/devops:cache
+            cache-to: type=inline,mode=max
+            
+        - name: Pull the Docker image for scanning
+          run: docker pull user/devops:${{ github.sha }}
+            
+        - name: Scan the Docker image with Trivy
           uses: aquasecurity/trivy-action@master
           with:
-            image-ref: 'ashneon/devops:${{ github.sha }}'
+            image-ref: 'user/devops:${{ github.sha }}'
             format: 'table'
-            exit-code: '1' # Fail the job if vulnerabilities are found
+            exit-code: '1'
             ignore-unfixed: true
             severity: 'CRITICAL,HIGH'
